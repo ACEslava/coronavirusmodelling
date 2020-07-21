@@ -1,22 +1,3 @@
-% The model approaches reality as the training increments. Displaying the
-% True Infections vs Model Infections with a gradstep less than 1000 showed
-% a Model Infection that was a significant underestimation of the True
-% Infection. Increasing the gradstep to 2000 showed a Model Infection that
-% approached the trend of the True Infection.
-
-% The accuracy of the Model Infection can be evaluated using the Model
-% Error function in the script that was graphed as "Evolution of Model
-% Error During Training." As the Model Error approached 0, the discrepancy
-% between the Model Infection and True Infection decreased. This makes
-% sense, as the Model Error function evaluates the difference between the true
-% infection number and the model infection number at each gradstep. 
-
-%But as the gradstep increased past a critical point (around 1600), the Model
-% Error showed a slight increase. This can be attributed to the Gradient
-% Descent algorithm that was used. Thus, it is important to take the Model
-% Infection for the gradstep that has the least Model Error to get the most
-% accurate model of the True Infection.
-
 % Learning the parameters of the SEIRD simple model
 close all
 clear all
