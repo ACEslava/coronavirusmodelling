@@ -2,11 +2,14 @@
 close all
 clear all
 
-SEIRD       % generate the true data
-Itrue=TotalI;
-Dtrue=TotalD;
+SEIRD               % generate the true data
+%Itrue=TotalI;       % Evolution of infectious
 Horizon=t;
+TrainHorizon=floor(0.4*Horizon)
+Dtrue=TotalD([1:1:TrainHorizon]);       % Evolution of deaths
+CumItrue=CumI([1:1:TrainHorizon]);      % Evolution of new infectious
 
+%%
 % Initial guess of parameters
 
 b=0.55;     % spreading rate (corrected by 1/N in the eqn below)
@@ -17,46 +20,51 @@ w=0.1*d;   % rate I->D
 Seed=10;    % number of initially exposed
 N=2404;     % number of individuals
 
-gradsteps=2;
-NewModelError = 1;
+gradsteps=1;
+stepsize=1e-5;
+Stop=0;
 
-[Smodel,Emodel,Imodel,Rmodel,Dmodel]=SEIRDsimpleFunc(Horizon-1,2404,Seeds,b,a,d,w);
-[PreviousModelError, ModelError(1)]=deal(sum((Itrue-Imodel).^2)/Horizon);
+while (Stop==0)
+% Compute the model error
+[Smodel,Emodel,Imodel,Rmodel,Dmodel,CumImodel]=SEIRDsimpleFunc(TrainHorizon-1,2404,Seeds,b,a,d,w);
+ModelError(gradsteps)=sum(((CumItrue-CumImodel)/CumItrue(TrainHorizon)).^2+((Dtrue-Dmodel)/Dtrue(TrainHorizon)).^2)/TrainHorizon;
 
-while (PreviousModelError >= NewModelError) 
-    % Compute the model error
-    PreviousModelError = ModelError(gradsteps-1);
-    [Smodel,Emodel,Imodel,Rmodel,Dmodel]=SEIRDsimpleFunc(Horizon-1,2404,Seeds,b,a,d,w);
-    [NewModelError, ModelError(gradsteps)]=deal(sum((Itrue-Imodel).^2)/Horizon);
-    
-    ModelErrorDeaths(gradsteps) = sum((Dtrue - Dmodel).^2)/Horizon;
+% Run the model with small increments in each parameter
+Delta=0.01;
+[Sb,Eb,Ib,Rb,Db,CumIb]=SEIRDsimpleFunc(TrainHorizon-1,2404,Seeds,b+Delta,a,d,w);
+[Sa,Ea,Ia,Ra,Da,CumIa]=SEIRDsimpleFunc(TrainHorizon-1,2404,Seeds,b,a+Delta,d,w);
+[Sd,Ed,Id,Rd,Dd,CumId]=SEIRDsimpleFunc(TrainHorizon-1,2404,Seeds,b,a,d+Delta,w);
+[Sw,Ew,Iw,Rw,Dw,CumIw]=SEIRDsimpleFunc(TrainHorizon-1,2404,Seeds,b,a,d,w+Delta);
 
-    % Run the model with small increments in each parameter
-    Delta=0.001;
-    [Sdummy,Edummy,Ib,Rdummy,Db]=SEIRDsimpleFunc(Horizon-1,2404,Seeds,b+Delta,a,d,w);
-    [Sdummy,Edummy,Ia,Rdummy,Da]=SEIRDsimpleFunc(Horizon-1,2404,Seeds,b,a+Delta,d,w);
-    [Sdummy,Edummy,Id,Rdummy,Dd]=SEIRDsimpleFunc(Horizon-1,2404,Seeds,b,a,d+Delta,w);
-    [Sdummy,Edummy,Iw,Rdummy,Dw]=SEIRDsimpleFunc(Horizon-1,2404,Seeds,b,a,d,w+Delta);
+% Estimate derivatives as fractions
+DerErrorb=((sum(((CumItrue-CumIb)/CumItrue(TrainHorizon)).^2+((Dtrue-Db)/Dtrue(TrainHorizon)).^2)/TrainHorizon)-ModelError(gradsteps))/Delta;
+DerErrora=((sum(((CumItrue-CumIa)/CumItrue(TrainHorizon)).^2+((Dtrue-Da)/Dtrue(TrainHorizon)).^2)/TrainHorizon)-ModelError(gradsteps))/Delta;
+DerErrord=((sum(((CumItrue-CumId)/CumItrue(TrainHorizon)).^2+((Dtrue-Dd)/Dtrue(TrainHorizon)).^2)/TrainHorizon)-ModelError(gradsteps))/Delta;
+DerErrorw=((sum(((CumItrue-CumIw)/CumItrue(TrainHorizon)).^2+((Dtrue-Dw)/Dtrue(TrainHorizon)).^2)/TrainHorizon)-ModelError(gradsteps))/Delta;
 
-    % Estimate derivatives as fractions
-    DerErrorb=((sum((Itrue-Ib).^2)/Horizon)-ModelError(gradsteps))/Delta + ((sum((Dtrue-Db).^2)/Horizon)-ModelErrorDeaths(gradsteps))/Delta;
-    DerErrora=((sum((Itrue-Ia).^2)/Horizon)-ModelError(gradsteps))/Delta  + ((sum((Dtrue-Da).^2)/Horizon)-ModelErrorDeaths(gradsteps))/Delta;
-    DerErrord=((sum((Itrue-Id).^2)/Horizon)-ModelError(gradsteps))/Delta  + ((sum((Dtrue-Dd).^2)/Horizon)-ModelErrorDeaths(gradsteps))/Delta;
-    DerErrorw=((sum((Itrue-Iw).^2)/Horizon)-ModelError(gradsteps))/Delta  + ((sum((Dtrue-Dw).^2)/Horizon)-ModelErrorDeaths(gradsteps))/Delta;
+% Update the values of the parameters (gradient descent)
+b=b-stepsize*DerErrorb;
+a=a-stepsize*DerErrora;
+d=d-stepsize*DerErrord;
+w=w-stepsize*DerErrorw;
 
-    % Update the values of the parameters (gradient descent)
-    stepsize=1e-8;
-    b=b-stepsize*DerErrorb;
-    a=a-stepsize*DerErrora;
-    d=d-stepsize*DerErrord;
-    w=w-stepsize*DerErrorw;
-
-    gradsteps=gradsteps+1
+if gradsteps>2  % Stopping condition when error increases in a gradient step
+    Stop=ModelError(gradsteps)-ModelError(gradsteps-1)>0;
 end
+
+gradsteps=gradsteps+1
+end
+
 b
 a
 d
 w
+
+[Smodel,Emodel,Imodel,Rmodel,Dmodel,CumImodel]=SEIRDsimpleFunc(Horizon-1,2404,Seeds,b,a,d,w);
+
 figure; plot(ModelError); title('Evolution of model error during training')
-figure; plot(Itrue,'r'); hold on; plot(Imodel,'g'); title('True infections vs Model infections')
-figure; plot(Dtrue,'r'); hold on; plot(Dmodel,'g'); title('True deaths vs Model deaths')
+figure; plot(CumI,'r'); hold on; plot(CumImodel,'r'); title('True infections vs Model infections')
+plot(CumItrue); hold on; plot(CumImodel); title('True infections vs Model infections')
+
+figure; plot(TotalD,'m'); hold on; plot(Dmodel,'m'); title('True deaths vs Model deaths')
+plot(Dtrue); hold on; plot(Dmodel); title('True deaths vs Model deaths')
