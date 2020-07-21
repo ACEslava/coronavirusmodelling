@@ -27,7 +27,7 @@ S = ones(Asiz,1) - E; %assigns susceptible population
 
 %Mask wearers
 Masks = zeros(Asiz,1);
-for mask=1:floor(Asiz*0) %mask wearing percentage
+for mask=1:floor(Asiz*0.5) %mask wearing percentage
     Masks(ceil(Asiz*rand)) = 1; %assigns random people to be mask wearers according to percentage defined in for loop
 end
 
@@ -36,6 +36,16 @@ ALockdown = A;
 for i = 1:Asiz 
     for j = i+1:Asiz
         if (rand<0.5) ==1
+            ALockdown(i,j) = 0;
+            ALockdown(j,i) = 0;
+        end
+    end
+end
+
+AHalfLockdown = A;
+for i = 1:Asiz 
+    for j = i+1:Asiz
+        if (rand<0.25) == 1
             ALockdown(i,j) = 0;
             ALockdown(j,i) = 0;
         end
@@ -57,7 +67,10 @@ while (sum(E) + sum(As) + sum(I) > 0)
     SumD(t) = sum(D);
 
     %Lockdown Strategy
-    if SumI(t)/Asiz > 0.02 %Upper threshold for lockdown
+    if sum(lockdown) > 60
+        ACurrent = AHalfLockdown;
+        lockdown(t) = 0.5;
+    elseif SumI(t)/Asiz > 0.02 %Upper threshold for lockdown
         ACurrent = ALockdown;
         lockdown(t) = 1;
     elseif (SumI(t)/Asiz) < 0.0005 %Lower threshold for lockdown
@@ -118,7 +131,7 @@ while (sum(E) + sum(As) + sum(I) > 0)
     H = H + NewH - (HtoR + NewD);
     R = R + NewR;
     D = D + NewD;
-   
+
     t=t+1;
 end
 
