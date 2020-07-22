@@ -4,8 +4,10 @@ clc
 % Parameters
 %load FB2404
 %A=ones(2404)-eye(2404);
+
+%Creates the initial graph
 Asiz = 2404;
-movement = 1;
+movement = 1; %Initial movement is 1*normal movement
 positionx = unifrnd(-1,1,Asiz,1);
 positiony = unifrnd(-1,1,Asiz,1);
 node1=positionx;
@@ -24,6 +26,7 @@ for i=1:Asiz
     end
 end
 
+%Parameters
 alpha = 0.09; %Given
 beta = 0.3; %Taken from SEIRDLockdown_NewVersion.m
 gamma = 0.08; %(alpha/0.66) = (gamma/0.33)
@@ -54,6 +57,7 @@ HRandom = rand(Asiz,1);
 %Iterations of infection
 while (sum(E) + sum(As) + sum(I) > 0) 
 
+    %Randomly moves nodes based on movement multiplier (0.6x movement, 2x movement, etc)
     node1=positionx+movement*(unifrnd(-0.1,0.1,Asiz,1));
     node2=positiony+movement*(unifrnd(-0.1,0.1,Asiz,1));
     
@@ -88,9 +92,9 @@ while (sum(E) + sum(As) + sum(I) > 0)
     SumR(t) = sum(R);
     SumD(t) = sum(D);
 
-    %Lockdown Strategy
+    %Lockdown Strategy, change proximity and movement here. I just picked random values
     if sum(lockdown) > 60
-        proximity = 0.03;
+        proximity = 0.03; 
         movement = 0.7;
         lockdown(t) = 0.5;
     elseif SumI(t)/Asiz > 0.02 %Upper threshold for lockdown
