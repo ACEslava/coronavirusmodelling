@@ -3,15 +3,16 @@ close all
 clc
 % Parameters
 %load FB2404
-A=ones(2404)-eye(2404);
-alpha = 0.3; %Given
-beta = 0.85/2404; %Taken from SEIRDLockdown_NewVersion.m
+load FB2404
+%A=ones(2404)-eye(2404);
+alpha = 1/5; %Given
+beta = 0.3; %Taken from SEIRDLockdown_NewVersion.m
 gamma = 1/10; %(alpha/0.66) = (gamma/0.33)
-delta = 0.4; %Given
+delta = 1/10; %Given
 theta = 1/7; %Given
 h = 1/90; %(delta/0.9) = (h/0.1)
-omega = 0.01; %(theta/0.9) = (omega/0.1)
-Seeds = 10;
+omega = 1/63; %(theta/0.9) = (omega/0.1)
+Seeds = 100;
 
 %Initialise variables
 Asiz = size(A,1);
@@ -159,7 +160,7 @@ DaysCOVID = t
 
 %plotted on a logarithmic y scale
 figure;
-<<<<<<< HEAD
+
 plot(SumS/Asiz, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
 plot(SumE/Asiz, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
 plot(SumI/Asiz, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
@@ -173,7 +174,7 @@ plot(lockdown, 'Displayname', 'Lockdown');hold on
 plot(mask, 'Displayname', 'Mask')
 ylim([0 1.1])
 xlim([0 t+5])
-=======
+
 plot(SumS, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
 plot(SumE, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
 plot(SumI, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
@@ -187,5 +188,5 @@ plot(SumD, 'k','LineWidth',1.5,'DisplayName','Deceased');
 % plot(mask, 'Displayname', 'Mask')
 % ylim([0 1.1])
 % xlim([0 t+5])
->>>>>>> 0352195daaa85e657a8ae7b7c74f33f96c20982a
+
 grid on
