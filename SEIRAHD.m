@@ -2,21 +2,14 @@ clear all
 close all
 clc
 % Parameters
-load FB2404
-%A=ones(2404)-eye(2404);
-alpha = 1/5; %Given
-beta = 0.3; %Taken from SEIRDLockdown_NewVersion.m
 %load FB2404
 A=ones(2404)-eye(2404);
 alpha = 0.3; %Given
 beta = 0.85/2404; %Taken from SEIRDLockdown_NewVersion.m
 gamma = 1/10; %(alpha/0.66) = (gamma/0.33)
-delta = 1/10; %Given
 delta = 0.4; %Given
 theta = 1/7; %Given
 h = 1/90; %(delta/0.9) = (h/0.1)
-omega = 1/63; %(theta/0.9) = (omega/0.1)
-Seeds = 100;
 omega = 0.01; %(theta/0.9) = (omega/0.1)
 Seeds = 10;
 
@@ -90,7 +83,6 @@ while (sum(E) + sum(As) + sum(I) > 0)
     else
         lockdown(t) = lockdown(t-1);
     end
-
     
     
     %Mask Strategy
@@ -103,7 +95,6 @@ while (sum(E) + sum(As) + sum(I) > 0)
     end
 
     %Mask wearing neighbors
-    INeighbors = A*(or(I,As)); %vector of infected neighbors
     INeighbors = ACurrent*(or(I,As)); %vector of infected neighbors
     INeighbors_Mask = ACurrent*(or(I,As)).*Masks;
     INeighbors_NMask = INeighbors - INeighbors_Mask;
@@ -113,7 +104,6 @@ while (sum(E) + sum(As) + sum(I) > 0)
     else
         NewE = rand(Asiz,1) < 1 - (1-beta).^(INeighbors);   %infected given that no one wore mask
     end
-
     %S to E
     NewE = and(NewE,boolean(S)); %people that become E given that they were in S
 
@@ -167,9 +157,9 @@ TotalDeaths = SumD(t-1)
 DaysLockdown = sum(lockdown)
 DaysCOVID = t
 
-%Plotted on a logarithmic y scale
 %plotted on a logarithmic y scale
 figure;
+<<<<<<< HEAD
 plot(SumS/Asiz, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
 plot(SumE/Asiz, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
 plot(SumI/Asiz, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
@@ -183,4 +173,19 @@ plot(lockdown, 'Displayname', 'Lockdown');hold on
 plot(mask, 'Displayname', 'Mask')
 ylim([0 1.1])
 xlim([0 t+5])
+=======
+plot(SumS, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
+plot(SumE, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
+plot(SumI, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
+plot(SumA, 'Color', '#ff7f00', 'LineWidth',1.5, 'DisplayName','Asymptomatic');
+plot(SumH, 'Color', '#984ea3', 'LineWidth',1.5, 'DisplayName','Hospitalised');
+plot(SumR, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
+plot(SumD, 'k','LineWidth',1.5,'DisplayName','Deceased');
+
+% figure(2);
+% plot(lockdown, 'Displayname', 'Lockdown');hold on
+% plot(mask, 'Displayname', 'Mask')
+% ylim([0 1.1])
+% xlim([0 t+5])
+>>>>>>> 0352195daaa85e657a8ae7b7c74f33f96c20982a
 grid on
