@@ -162,15 +162,15 @@ while (sum(E) + sum(As) + sum(I) > 0)
     %H to D
     anotherrand = rand(Asiz, 1);
     age85 = and ((HRandom < 0.02), boolean(H));
-    age85 = and ((anotherrand < 0.3), age85);
+    age85 = and ((anotherrand < 0.03), age85);
     age75 = and ((HRandom > 0.02), (HRandom < 0.06));
     age75 = and (age75, boolean(H));
-    age75 = and ((anotherrand < 0.2), age75);
+    age75 = and ((anotherrand < 0.02), age75);
     age65 = and ((HRandom > 0.06), (HRandom < 0.16));
     age65 = and (age65, boolean(H));
-    age65 = and ((anotherrand < 0.1), age65);
+    age65 = and ((anotherrand < 0.01), age65);
     ageother = and ((HRandom > 0.16), boolean(H));
-    ageother = and ((anotherrand < 0.01), ageother);
+    ageother = and ((anotherrand < 0.001), ageother);
     
     NewD = or (age85, age75);
     NewD = or (NewD, age65);
