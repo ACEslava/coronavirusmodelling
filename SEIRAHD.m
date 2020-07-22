@@ -58,12 +58,6 @@ ACurrent = A;
 %Iterations of infection
 while (sum(E) + sum(As) + sum(I) > 0)
     %Population headcounts
-    t
-    SumS(t) = sum(S)
-    SumE(t) = sum(E)
-    SumA(t) = sum(As)
-    SumI(t) = sum(I)
-    SumH(t) = sum(H)
     t;
     SumS(t) = sum(S);
     SumE(t) = sum(E);
