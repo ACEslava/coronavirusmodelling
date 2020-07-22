@@ -6,12 +6,19 @@ load FB2404
 %A=ones(2404)-eye(2404);
 alpha = 1/5; %Given
 beta = 0.3; %Taken from SEIRDLockdown_NewVersion.m
+%load FB2404
+A=ones(2404)-eye(2404);
+alpha = 0.3; %Given
+beta = 0.85/2404; %Taken from SEIRDLockdown_NewVersion.m
 gamma = 1/10; %(alpha/0.66) = (gamma/0.33)
 delta = 1/10; %Given
+delta = 0.4; %Given
 theta = 1/7; %Given
 h = 1/90; %(delta/0.9) = (h/0.1)
 omega = 1/63; %(theta/0.9) = (omega/0.1)
 Seeds = 100;
+omega = 0.01; %(theta/0.9) = (omega/0.1)
+Seeds = 10;
 
 %Initialise variables
 Asiz = size(A,1);
@@ -56,7 +63,7 @@ t = 1;
 ACurrent = A;
 [mask,lockdown] = deal(zeros(200,1));
 %Iterations of infection
-while (sum(E) + sum(As) + sum(I) > 0)
+while (sum(E) + sum(As) + sum(I) > 0) 
     %Population headcounts
     t;
     SumS(t) = sum(S);
@@ -84,6 +91,8 @@ while (sum(E) + sum(As) + sum(I) > 0)
         lockdown(t) = lockdown(t-1);
     end
 
+    
+    
     %Mask Strategy
     if (SumI(t)/Asiz) > 0.001
         mask(t) = 1;
@@ -95,6 +104,7 @@ while (sum(E) + sum(As) + sum(I) > 0)
 
     %Mask wearing neighbors
     INeighbors = A*(or(I,As)); %vector of infected neighbors
+    INeighbors = ACurrent*(or(I,As)); %vector of infected neighbors
     INeighbors_Mask = ACurrent*(or(I,As)).*Masks;
     INeighbors_NMask = INeighbors - INeighbors_Mask;
     
@@ -158,6 +168,7 @@ DaysLockdown = sum(lockdown)
 DaysCOVID = t
 
 %Plotted on a logarithmic y scale
+%plotted on a logarithmic y scale
 figure;
 plot(SumS/Asiz, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
 plot(SumE/Asiz, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
