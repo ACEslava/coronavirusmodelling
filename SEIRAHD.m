@@ -3,7 +3,6 @@ close all
 clc
 % Parameters
 %load FB2404
-load FB2404
 %A=ones(2404)-eye(2404);
 alpha = 1/5; %Given
 beta = 0.3; %Taken from SEIRDLockdown_NewVersion.m
@@ -68,8 +67,8 @@ while (sum(E) + sum(As) + sum(I) > 0)
     if SumH(t) < 0
         SumH(t) = 0;
     end
-    SumR(t) = sum(R)
-    SumD(t) = sum(D)
+    SumR(t) = sum(R);
+    SumD(t) = sum(D);
 
     %Lockdown Strategy
     if sum(lockdown) > 60
@@ -130,6 +129,7 @@ while (sum(E) + sum(As) + sum(I) > 0)
     age65 = and ((anotherrand < 0.1), age65);
     ageother = and ((HRandom > 0.16), boolean(H));
     ageother = and ((anotherrand < 0.01), ageother);
+    
     NewD = or (age85, age75);
     NewD = or (NewD, age65);
     NewD = or (NewD, ageother);
@@ -138,7 +138,7 @@ while (sum(E) + sum(As) + sum(I) > 0)
     %I or H or A to R
     %R had to differently programmed b/c it has multiple in edges
     ItoR = and((IRandom>1-delta), boolean(I));
-    HtoR = and((HRandom<theta), boolean(H));
+    HtoR = and(and((HRandom<theta), boolean(H)), not(NewD));
     AtoR = and((rand(Asiz,1)<delta), boolean(As));
     NewR = or(or(ItoR, HtoR), AtoR);
 
@@ -150,7 +150,7 @@ while (sum(E) + sum(As) + sum(I) > 0)
     H = H + NewH - (HtoR + NewD);
     R = R + NewR;
     D = D + NewD;
-
+    
     t=t+1;
 end
 
@@ -161,27 +161,19 @@ DaysCOVID = t
 %plotted on a logarithmic y scale
 figure;
 
-plot(SumS/Asiz, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
-plot(SumE/Asiz, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
-plot(SumI/Asiz, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
-plot(SumA/Asiz, 'Color', '#ff7f00', 'LineWidth',1.5, 'DisplayName','Asymptomatic');
-plot(SumH/Asiz, 'Color', '#984ea3', 'LineWidth',1.5, 'DisplayName','Hospitalised'); %has slight problem
-plot(SumR/Asiz, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
-plot(SumD/Asiz, 'k','LineWidth',1.5,'DisplayName','Deceased');
+plot(SumS, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
+plot(SumE, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
+plot(SumI, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
+plot(SumA, 'Color', '#ff7f00', 'LineWidth',1.5, 'DisplayName','Asymptomatic');
+plot(SumH, 'Color', '#984ea3', 'LineWidth',1.5, 'DisplayName','Hospitalised'); %has slight problem
+plot(SumR, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
+plot(SumD, 'k','LineWidth',1.5,'DisplayName','Deceased');
 
 figure(2);
 plot(lockdown, 'Displayname', 'Lockdown');hold on
 plot(mask, 'Displayname', 'Mask')
 ylim([0 1.1])
 xlim([0 t+5])
-
-plot(SumS, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
-plot(SumE, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
-plot(SumI, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
-plot(SumA, 'Color', '#ff7f00', 'LineWidth',1.5, 'DisplayName','Asymptomatic');
-plot(SumH, 'Color', '#984ea3', 'LineWidth',1.5, 'DisplayName','Hospitalised');
-plot(SumR, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
-plot(SumD, 'k','LineWidth',1.5,'DisplayName','Deceased');
 
 % figure(2);
 % plot(lockdown, 'Displayname', 'Lockdown');hold on
