@@ -6,8 +6,9 @@ clc
 %A=ones(2404)-eye(2404);
 
 Asiz = 2404;
-node1=rand(Asiz,1);
-node2=rand(Asiz,1);
+movement = rand(Asiz,1);
+node1=movement;
+node2=movement;
 
 %figure; plot(node1,node2,'o'); hold on
 rad=0.03;
@@ -53,8 +54,8 @@ HRandom = rand(Asiz,1);
 while (sum(E) + sum(As) + sum(I) > 0) 
     t
     Asiz = 2404;
-    node1=rand(Asiz,1);
-    node2=rand(Asiz,1);
+    node1=movement;
+    node2=movement;
 
 %figure; plot(node1,node2,'o'); hold on
     rad=0.03;
@@ -101,7 +102,7 @@ while (sum(E) + sum(As) + sum(I) > 0)
     SumE(t) = sum(E);
     SumA(t) = sum(As);
     SumI(t) = sum(I);
-    SumH(t) = sum(H)
+    SumH(t) = sum(H);
     SumR(t) = sum(R);
     SumD(t) = sum(D);
 
@@ -150,16 +151,10 @@ while (sum(E) + sum(As) + sum(I) > 0)
     %I to H
     IRandom = rand(Asiz,1);
     %NewH = and((IRandom<0.1), boolean(I));
-    age85 = and ((HRandom < 0.02), boolean(I));
-    age85 = and ((IRandom < 0.03), age85);
-    age75 = and ((HRandom > 0.02), (HRandom < 0.06));
-    age75 = and (age75, boolean(I));
-    age75 = and ((IRandom < 0.02), age75);
-    age65 = and ((HRandom > 0.06), (HRandom < 0.16));
-    age65 = and (age65, boolean(I));
-    age65 = and ((IRandom < 0.01), age65);
-    ageother = and ((HRandom > 0.16), boolean(I));
-    ageother = and ((IRandom < 0.001), ageother);
+    age85 = and ((IRandom < 0.03), and ((HRandom < 0.02), boolean(I)));
+    age75 = and ((IRandom < 0.02), and(and ((HRandom > 0.02), (HRandom < 0.06)),boolean(I)));
+    age65 = and ((IRandom < 0.01), and(and ((HRandom > 0.06), (HRandom < 0.16)),boolean(I)));
+    ageother = and ((IRandom < 0.001), and ((HRandom > 0.16), boolean(I)));
     NewH = or (age85, age75);
     NewH = or (NewH, age65);
     NewH = or (NewH, ageother);
@@ -174,16 +169,10 @@ while (sum(E) + sum(As) + sum(I) > 0)
     
     %H to D
     anotherrand = rand(Asiz, 1);
-    age85 = and ((HRandom < 0.02), boolean(H));
-    age85 = and ((anotherrand < 0.03), age85);
-    age75 = and ((HRandom > 0.02), (HRandom < 0.06));
-    age75 = and (age75, boolean(H));
-    age75 = and ((anotherrand < 0.02), age75);
-    age65 = and ((HRandom > 0.06), (HRandom < 0.16));
-    age65 = and (age65, boolean(H));
-    age65 = and ((anotherrand < 0.01), age65);
-    ageother = and ((HRandom > 0.16), boolean(H));
-    ageother = and ((anotherrand < 0.001), ageother);
+    age85 = and ((anotherrand < 0.03), and ((HRandom < 0.02), boolean(H)));
+    age75 = and ((anotherrand < 0.02), and (and ((HRandom > 0.02), (HRandom < 0.06)), boolean(H)));
+    age65 = and ((anotherrand < 0.01), and (and ((HRandom > 0.06), (HRandom < 0.16)), boolean(H)));
+    ageother = and ((anotherrand < 0.001), and ((HRandom > 0.16), boolean(H)));
     
     NewD = or (age85, age75);
     NewD = or (NewD, age65);
@@ -208,7 +197,6 @@ DaysCOVID = t
 
 %plotted on a logarithmic y scale
 figure;
-
 plot(SumS/Asiz, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
 plot(SumE/Asiz, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
 plot(SumI/Asiz, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
