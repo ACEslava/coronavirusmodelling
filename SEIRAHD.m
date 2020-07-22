@@ -64,6 +64,12 @@ while (sum(E) + sum(As) + sum(I) > 0)
     SumA(t) = sum(As)
     SumI(t) = sum(I)
     SumH(t) = sum(H)
+    t;
+    SumS(t) = sum(S);
+    SumE(t) = sum(E);
+    SumA(t) = sum(As);
+    SumI(t) = sum(I);
+    SumH(t) = sum(H);
     if SumH(t) < 0
         SumH(t) = 0;
     end
