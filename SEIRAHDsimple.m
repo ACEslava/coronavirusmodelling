@@ -9,8 +9,7 @@
 % 	end
 % end
 
-load FB2404
-Asiz = size(A,1);
+Asiz = 2404;
 
 alpha = 0.09; %Given
 beta = 0.85; %Taken from SEIRDLockdown_NewVersion.m

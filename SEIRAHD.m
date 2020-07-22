@@ -4,23 +4,24 @@ clc
 % Parameters
 %load FB2404
 %A=ones(2404)-eye(2404);
-
 Asiz = 2404;
-movement = rand(Asiz,1);
-node1=movement;
-node2=movement;
+movement = 1;
+positionx = unifrnd(-1,1,Asiz,1);
+positiony = unifrnd(-1,1,Asiz,1);
+node1=positionx;
+node2=positiony ;
+node1(node1>1) = -1;
+node1(node1<-1) = 1;
+node2(node2>1) = -1;
+node2(node2<-1) = 1;
 
-%figure; plot(node1,node2,'o'); hold on
-rad=0.03;
-
+proximity = 0.05;
 A = zeros(Asiz,Asiz);
 for i=1:Asiz
-	for j=1:Asiz
-		Distance(i,j) = sqrt((node1(i)-node1(j))^2+(node2(i)-node2(j))^2);
-		A(i,j) = Distance(i,j) < rad;
-% 		if A(i,j) ==1
-% 			plot([node1(i) node1(j)],[node2(i) node2(j)]) 
-	end
+    for j=1:Asiz
+        Distance(i,j) = sqrt((node1(i)-node1(j))^2+(node2(i)-node2(j))^2);
+        A(i,j) = Distance(i,j) < proximity;
+    end
 end
 
 alpha = 0.09; %Given
@@ -29,7 +30,7 @@ gamma = 0.08; %(alpha/0.66) = (gamma/0.33)
 delta = 0.982; %Given
 theta = 0.99999820042; %Given
 h = 0.2033; %(delta/0.9) = (h/0.1)
-omega = 0.00000179957; %(theta/0.9) = (omega/0.1)
+omega = 0.01; %(theta/0.9) = (omega/0.1)
 Seeds = 100;
 
 %Initialise variables
@@ -52,49 +53,30 @@ HRandom = rand(Asiz,1);
 
 %Iterations of infection
 while (sum(E) + sum(As) + sum(I) > 0) 
-    t
-    Asiz = 2404;
-    node1=movement;
-    node2=movement;
 
-%figure; plot(node1,node2,'o'); hold on
-    rad=0.03;
+    node1=positionx+movement*(unifrnd(-0.1,0.1,Asiz,1));
+    node2=positiony+movement*(unifrnd(-0.1,0.1,Asiz,1));
+    
+    node1(node1>1) = -1;
+    node1(node1<-1) = 1;
+    node2(node2>1) = -1;
+    node2(node2<-1) = 1;
+    
 
     A = zeros(Asiz,Asiz);
     for i=1:Asiz
         for j=1:Asiz
             Distance(i,j) = sqrt((node1(i)-node1(j))^2+(node2(i)-node2(j))^2);
-            A(i,j) = Distance(i,j) < rad;
-% 		if A(i,j) ==1
-% 			plot([node1(i) node1(j)],[node2(i) node2(j)]) 
+            A(i,j) = Distance(i,j) < proximity;
         end
     end
+    positionx = node1;
+    positiony = node2;
     
     %Mask wearers
     Masks = zeros(Asiz,1);
     for maskcount=1:floor(Asiz*0.5) %mask wearing percentage
         Masks(ceil(Asiz*rand)) = 1; %assigns random people to be mask wearers according to percentage defined in for loop
-    end
-
-    %How a Lockdown graph would look like
-    ALockdown = A;
-    for i = 1:Asiz 
-        for j = i+1:Asiz
-            if (rand<0.5) ==1
-                ALockdown(i,j) = 0;
-                ALockdown(j,i) = 0;
-            end
-        end
-    end
-
-    AHalfLockdown = A;
-    for i = 1:Asiz 
-        for j = i+1:Asiz
-            if (rand<0.25) == 1
-                ALockdown(i,j) = 0;
-                ALockdown(j,i) = 0;
-            end
-        end
     end
 
     %Population headcounts
@@ -108,13 +90,16 @@ while (sum(E) + sum(As) + sum(I) > 0)
 
     %Lockdown Strategy
     if sum(lockdown) > 60
-        ACurrent = AHalfLockdown;
+        proximity = 0.03;
+        movement = 0.7;
         lockdown(t) = 0.5;
     elseif SumI(t)/Asiz > 0.02 %Upper threshold for lockdown
-        ACurrent = ALockdown;
+        proximity = 0.01;
+        movement = 0.3;
         lockdown(t) = 1;
     elseif (SumI(t)/Asiz) < 0.0005 %Lower threshold for lockdown
-        ACurrent = A;
+        proximity = 0.05;
+        movement = 1;
         lockdown(t) = 0;
     else
         lockdown(t) = lockdown(t-1);
@@ -131,8 +116,8 @@ while (sum(E) + sum(As) + sum(I) > 0)
     end
 
     %Mask wearing neighbors
-    INeighbors = ACurrent*(or(I,As)); %vector of infected neighbors
-    INeighbors_Mask = ACurrent*(or(I,As)).*Masks;
+    INeighbors = A*(or(I,As)); %vector of infected neighbors
+    INeighbors_Mask = A*(or(I,As)).*Masks;
     INeighbors_NMask = INeighbors - INeighbors_Mask;
     
     if mask(t) ==1
@@ -187,7 +172,7 @@ while (sum(E) + sum(As) + sum(I) > 0)
     H = H + NewH - (HtoR + NewD);
     R = R + NewR;
     D = D + NewD;
-    
+    t
     t=t+1;
 end
 
