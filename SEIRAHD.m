@@ -4,6 +4,24 @@ clc
 % Parameters
 %load FB2404
 %A=ones(2404)-eye(2404);
+
+Asiz = 2404;
+node1=rand(Asiz,1);
+node2=rand(Asiz,1);
+
+%figure; plot(node1,node2,'o'); hold on
+rad=0.03;
+
+A = zeros(Asiz,Asiz);
+for i=1:Asiz
+	for j=1:Asiz
+		Distance(i,j) = sqrt((node1(i)-node1(j))^2+(node2(i)-node2(j))^2);
+		A(i,j) = Distance(i,j) < rad;
+% 		if A(i,j) ==1
+% 			plot([node1(i) node1(j)],[node2(i) node2(j)]) 
+	end
+end
+
 alpha = 1/5; %Given
 beta = 0.3; %Taken from SEIRDLockdown_NewVersion.m
 gamma = 1/10; %(alpha/0.66) = (gamma/0.33)
@@ -14,8 +32,6 @@ omega = 1/63; %(theta/0.9) = (omega/0.1)
 Seeds = 100;
 
 %Initialise variables
-Asiz = size(A,1);
-
 E = zeros(Asiz,1); %assigns initial seeds
 for seed = 1:Seeds
     E(ceil(Asiz*rand),1) = 1;
@@ -25,32 +41,7 @@ S = ones(Asiz,1) - E; %assigns susceptible population
 [I,As,R,H,D] = deal(zeros(Asiz,1)); %all other populations are 0 (no vaccines)
 [NewS,NewE,NewI,NewA,NewR,NewH,NewD] = deal(zeros(Asiz,1));
 
-%Mask wearers
-Masks = zeros(Asiz,1);
-for mask=1:floor(Asiz*0.5) %mask wearing percentage
-    Masks(ceil(Asiz*rand)) = 1; %assigns random people to be mask wearers according to percentage defined in for loop
-end
 
-%How a Lockdown graph would look like
-ALockdown = A;
-for i = 1:Asiz 
-    for j = i+1:Asiz
-        if (rand<0.5) ==1
-            ALockdown(i,j) = 0;
-            ALockdown(j,i) = 0;
-        end
-    end
-end
-
-AHalfLockdown = A;
-for i = 1:Asiz 
-    for j = i+1:Asiz
-        if (rand<0.25) == 1
-            ALockdown(i,j) = 0;
-            ALockdown(j,i) = 0;
-        end
-    end
-end
 
 t = 1;
 ACurrent = A;
@@ -60,18 +51,59 @@ HRandom = rand(Asiz,1);
 
 %Iterations of infection
 while (sum(E) + sum(As) + sum(I) > 0) 
-    %Population headcounts
     t
-    SumS(t) = sum(S)
-    SumE(t) = sum(E)
-    SumA(t) = sum(As)
-    SumI(t) = sum(I)
-    SumH(t) = sum(H)
-%     if SumH(t) < 0
-%         SumH(t) = 0;
-%     end
-    SumR(t) = sum(R)
-    SumD(t) = sum(D)
+    Asiz = 2404;
+    node1=rand(Asiz,1);
+    node2=rand(Asiz,1);
+
+%figure; plot(node1,node2,'o'); hold on
+    rad=0.03;
+
+    A = zeros(Asiz,Asiz);
+    for i=1:Asiz
+        for j=1:Asiz
+            Distance(i,j) = sqrt((node1(i)-node1(j))^2+(node2(i)-node2(j))^2);
+            A(i,j) = Distance(i,j) < rad;
+% 		if A(i,j) ==1
+% 			plot([node1(i) node1(j)],[node2(i) node2(j)]) 
+        end
+    end
+    
+    %Mask wearers
+    Masks = zeros(Asiz,1);
+    for maskcount=1:floor(Asiz*0.5) %mask wearing percentage
+        Masks(ceil(Asiz*rand)) = 1; %assigns random people to be mask wearers according to percentage defined in for loop
+    end
+
+    %How a Lockdown graph would look like
+    ALockdown = A;
+    for i = 1:Asiz 
+        for j = i+1:Asiz
+            if (rand<0.5) ==1
+                ALockdown(i,j) = 0;
+                ALockdown(j,i) = 0;
+            end
+        end
+    end
+
+    AHalfLockdown = A;
+    for i = 1:Asiz 
+        for j = i+1:Asiz
+            if (rand<0.25) == 1
+                ALockdown(i,j) = 0;
+                ALockdown(j,i) = 0;
+            end
+        end
+    end
+
+    %Population headcounts
+    SumS(t) = sum(S);
+    SumE(t) = sum(E);
+    SumA(t) = sum(As);
+    SumI(t) = sum(I);
+    SumH(t) = sum(H);
+    SumR(t) = sum(R);
+    SumD(t) = sum(D);
 
     %Lockdown Strategy
     if sum(lockdown) > 60
