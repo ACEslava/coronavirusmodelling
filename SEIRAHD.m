@@ -101,7 +101,7 @@ while (sum(E) + sum(As) + sum(I) > 0)
     SumE(t) = sum(E);
     SumA(t) = sum(As);
     SumI(t) = sum(I);
-    SumH(t) = sum(H);
+    SumH(t) = sum(H)
     SumR(t) = sum(R);
     SumD(t) = sum(D);
 
@@ -149,7 +149,20 @@ while (sum(E) + sum(As) + sum(I) > 0)
 
     %I to H
     IRandom = rand(Asiz,1);
-    NewH = and((IRandom<0.1), boolean(I));
+    %NewH = and((IRandom<0.1), boolean(I));
+    age85 = and ((HRandom < 0.02), boolean(I));
+    age85 = and ((IRandom < 0.03), age85);
+    age75 = and ((HRandom > 0.02), (HRandom < 0.06));
+    age75 = and (age75, boolean(I));
+    age75 = and ((IRandom < 0.02), age75);
+    age65 = and ((HRandom > 0.06), (HRandom < 0.16));
+    age65 = and (age65, boolean(I));
+    age65 = and ((IRandom < 0.01), age65);
+    ageother = and ((HRandom > 0.16), boolean(I));
+    ageother = and ((IRandom < 0.001), ageother);
+    NewH = or (age85, age75);
+    NewH = or (NewH, age65);
+    NewH = or (NewH, ageother);
 
 
     %I or H or A to R
