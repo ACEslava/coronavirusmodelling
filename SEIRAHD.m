@@ -22,13 +22,13 @@ for i=1:Asiz
 	end
 end
 
-alpha = 1/5; %Given
+alpha = 0.09; %Given
 beta = 0.3; %Taken from SEIRDLockdown_NewVersion.m
-gamma = 1/10; %(alpha/0.66) = (gamma/0.33)
-delta = 1/10; %Given
-theta = 1/7; %Given
-h = 1/90; %(delta/0.9) = (h/0.1)
-omega = 1/63; %(theta/0.9) = (omega/0.1)
+gamma = 0.08; %(alpha/0.66) = (gamma/0.33)
+delta = 0.982; %Given
+theta = 0.99999820042; %Given
+h = 0.2033; %(delta/0.9) = (h/0.1)
+omega = 0.00000179957; %(theta/0.9) = (omega/0.1)
 Seeds = 100;
 
 %Initialise variables
