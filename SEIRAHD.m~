@@ -56,13 +56,10 @@ end
 t = 1;
 ACurrent = A;
 [mask,lockdown] = deal(zeros(200,1));
-
-HRandom = rand(Asiz,1);
-
 %Iterations of infection
 while (sum(E) + sum(As) + sum(I) > 0) 
     %Population headcounts
-    t
+    t;
     SumS(t) = sum(S)
     SumE(t) = sum(E)
     SumA(t) = sum(As)
@@ -119,16 +116,9 @@ while (sum(E) + sum(As) + sum(I) > 0)
     %I to H
     IRandom = rand(Asiz,1);
     NewH = and((IRandom<0.1), boolean(I));
-
-
-    %I or H or A to R
-    %R had to differently programmed b/c it has multiple in edges
-    ItoR = and((IRandom>1-delta), boolean(I));
-    HtoR = and((HRandom<theta), boolean(H));
-    AtoR = and((rand(Asiz,1)<delta), boolean(As));
-    NewR = or(or(ItoR, HtoR), AtoR);
     
     %H to D
+    HRandom = rand(Asiz,1);
     anotherrand = rand(Asiz, 1);
     age85 = and ((HRandom < 0.02), boolean(H));
     age85 = and ((anotherrand < 0.3), age85);
@@ -143,7 +133,14 @@ while (sum(E) + sum(As) + sum(I) > 0)
     NewD = or (age85, age75);
     NewD = or (NewD, age65);
     NewD = or (NewD, ageother);
-    NewD = and (not(NewR), NewD);
+
+
+    %I or H or A to R
+    %R had to differently programmed b/c it has multiple in edges
+    ItoR = and((IRandom>1-delta), boolean(I));
+    HtoR = and((HRandom<theta), boolean(H));
+    AtoR = and((rand(Asiz,1)<delta), boolean(As));
+    NewR = or(or(ItoR, HtoR), AtoR);
 
     %Update indicators
     S = S - NewE;
@@ -177,6 +174,14 @@ plot(lockdown, 'Displayname', 'Lockdown');hold on
 plot(mask, 'Displayname', 'Mask')
 ylim([0 1.1])
 xlim([0 t+5])
+
+plot(SumS, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
+plot(SumE, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
+plot(SumI, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
+plot(SumA, 'Color', '#ff7f00', 'LineWidth',1.5, 'DisplayName','Asymptomatic');
+plot(SumH, 'Color', '#984ea3', 'LineWidth',1.5, 'DisplayName','Hospitalised');
+plot(SumR, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
+plot(SumD, 'k','LineWidth',1.5,'DisplayName','Deceased');
 
 % figure(2);
 % plot(lockdown, 'Displayname', 'Lockdown');hold on
