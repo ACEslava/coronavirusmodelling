@@ -11,12 +11,17 @@ Changelog July 22 (SEIRAHD):
 Tweaked parameters to fit real data
 
 Lockdown has 3 stages: Full, Restricted, and None
+
 Nodes now get "tired" of full quarantine after 30 days and go to Restricted
+
 Lockdown is a little stricter than before
+
 Lockdown goes to None if there are no new infections for 14 days
 
 Mask policy a little stricter
 
 Optimised code to run faster
+
 Resolved negative infection bug
+
 Main population chart outputs logarithmic scaled y axis
