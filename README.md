@@ -3,3 +3,20 @@ Google Slides: https://docs.google.com/presentation/d/1SKKAzS4NfbKL9ZyYZfk1joR-H
 
 
 Google Docs Notes: https://docs.google.com/document/d/14N1PLHnS2M2f0b7z_c2C7fkpO5GcgqwEbVnwKXVoaqw/edit?usp=sharing
+
+
+
+Changelog July 22 (SEIRAHD):
+
+Tweaked parameters to fit real data
+
+Lockdown has 3 stages: Full, Restricted, and None
+Nodes now get "tired" of full quarantine after 30 days and go to Restricted
+Lockdown is a little stricter than before
+Lockdown goes to None if there are no new infections for 14 days
+
+Mask policy a little stricter
+
+Optimised code to run faster
+Resolved negative infection bug
+Main population chart outputs logarithmic scaled y axis
