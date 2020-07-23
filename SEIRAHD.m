@@ -6,7 +6,7 @@ clc
 %A=ones(2404)-eye(2404);
 
 %Creates the initial graph
-Asiz = 2404;
+Asiz = 5000;
 movement = 1; %Initial movement is 1*normal movement
 positionx = unifrnd(-1,1,Asiz,1);
 positiony = unifrnd(-1,1,Asiz,1);
@@ -17,24 +17,24 @@ node1(node1<-1) = 1;
 node2(node2>1) = -1;
 node2(node2<-1) = 1;
 
-proximity = 0.05;
-A = zeros(Asiz,Asiz);
-for i=1:Asiz
-    for j=1:Asiz
+proximity = 0.1;
+[A,Distance] = deal(zeros(Asiz,Asiz));
+for j=1:Asiz
+    for i=1:Asiz
         Distance(i,j) = sqrt((node1(i)-node1(j))^2+(node2(i)-node2(j))^2);
         A(i,j) = Distance(i,j) < proximity;
     end
 end
 
 %Parameters
-alpha = 0.09; %Given
-beta = 0.3; %Taken from SEIRDLockdown_NewVersion.m
-gamma = 0.08; %(alpha/0.66) = (gamma/0.33)
-delta = 0.982; %Given
-theta = 0.99999820042; %Given
-h = 0.2033; %(delta/0.9) = (h/0.1)
-omega = 0.01; %(theta/0.9) = (omega/0.1)
-Seeds = 100;
+alpha = 0.09; 
+beta = 0.1;
+gamma = 0.08; 
+delta = 0.7; 
+theta = 0.99999820042;
+h = 0.2033;
+omega = 0.01;
+Seeds = 1;
 
 %Initialise variables
 E = zeros(Asiz,1); %assigns initial seeds
@@ -45,13 +45,14 @@ end
 S = ones(Asiz,1) - E; %assigns susceptible population
 [I,As,R,H,D] = deal(zeros(Asiz,1)); %all other populations are 0 (no vaccines)
 [NewS,NewE,NewI,NewA,NewR,NewH,NewD] = deal(zeros(Asiz,1));
-
+[SumS,SumE,SumI,SumA,SumR,SumH,SumD] = deal(zeros(1000,1));
 
 
 t = 1;
 ACurrent = A;
 [mask,lockdown] = deal(zeros(200,1));
-
+[lockdowndays,zerodays] = deal(0);
+[FullLockdown,RestrictedLockdown,NoLockdown] = deal(0);
 HRandom = rand(Asiz,1);
 
 %Iterations of infection
@@ -67,9 +68,8 @@ while (sum(E) + sum(As) + sum(I) > 0)
     node2(node2<-1) = 1;
     
 
-    A = zeros(Asiz,Asiz);
-    for i=1:Asiz
-        for j=1:Asiz
+    for j=1:Asiz
+        for i=1:Asiz
             Distance(i,j) = sqrt((node1(i)-node1(j))^2+(node2(i)-node2(j))^2);
             A(i,j) = Distance(i,j) < proximity;
         end
@@ -92,29 +92,51 @@ while (sum(E) + sum(As) + sum(I) > 0)
     SumR(t) = sum(R);
     SumD(t) = sum(D);
 
-    %Lockdown Strategy, change proximity and movement here. I just picked random values
-    if sum(lockdown) > 60
-        proximity = 0.03; 
-        movement = 0.7;
-        lockdown(t) = 0.5;
-    elseif SumI(t)/Asiz > 0.02 %Upper threshold for lockdown
-        proximity = 0.01;
-        movement = 0.3;
+    if SumI(t) == 0
+        zerodays = zerodays+1;
+    else
+        zerodays = 0;
+    end
+    
+    %Lockdown Strategy
+    if (SumI(t)/Asiz) > 0.005 %Full Lockdown
+        proximity = 0.03;
+        movement = 0.4;
         lockdown(t) = 1;
-    elseif (SumI(t)/Asiz) < 0.0005 %Lower threshold for lockdown
-        proximity = 0.05;
+    elseif zerodays > 14 %None
+        proximity = 0.1;
         movement = 1;
         lockdown(t) = 0;
+        lockdowndays = 0;
+    elseif t == 1
+        lockdown (1) = 0;
     else
         lockdown(t) = lockdown(t-1);
     end
     
+    if lockdowndays > 30 %Restricted Lockdown
+        proximity = 0.05; 
+        movement = 0.8;
+        lockdown(t) = 0.5;
+        lockdowndays = 0;
+    end
+    
+    if lockdown(t) == 1
+        FullLockdown = FullLockdown + 1;
+        lockdowndays = lockdowndays + 1;
+    elseif lockdown(t) == 0.5
+        RestrictedLockdown = RestrictedLockdown + 1;
+    else
+        NoLockdown = NoLockdown + 1;
+    end
     
     %Mask Strategy
-    if (SumI(t)/Asiz) > 0.001
+    if (SumI(t)/Asiz) > 0.00000094285
         mask(t) = 1;
-    elseif (SumI(t)/Asiz) < 0.0001
+    elseif zerodays > 21
         mask(t) = 0;
+    elseif t==1
+        mask(1) =0;
     else
         mask(t) = mask(t-1);
     end
@@ -140,10 +162,10 @@ while (sum(E) + sum(As) + sum(I) > 0)
     %I to H
     IRandom = rand(Asiz,1);
     %NewH = and((IRandom<0.1), boolean(I));
-    age85 = and ((IRandom < 0.03), and ((HRandom < 0.02), boolean(I)));
-    age75 = and ((IRandom < 0.02), and(and ((HRandom > 0.02), (HRandom < 0.06)),boolean(I)));
-    age65 = and ((IRandom < 0.01), and(and ((HRandom > 0.06), (HRandom < 0.16)),boolean(I)));
-    ageother = and ((IRandom < 0.001), and ((HRandom > 0.16), boolean(I)));
+    age85 = and (boolean(I), and ((HRandom < 0.02), (IRandom < 0.03)));
+    age75 = and (boolean(I), and (and ((HRandom > 0.02), (HRandom < 0.06)), (IRandom < 0.02)));
+    age65 = and (boolean(I), and(and ((HRandom > 0.06), (HRandom < 0.16)), (IRandom < 0.01)));
+    ageother = and (boolean(I), and ((HRandom > 0.16), (IRandom < 0.001)));
     NewH = or (age85, age75);
     NewH = or (NewH, age65);
     NewH = or (NewH, ageother);
@@ -179,23 +201,37 @@ while (sum(E) + sum(As) + sum(I) > 0)
     t
     t=t+1;
 end
+SumS(t:1000) = [];
+SumE(t:1000) = [];
+SumI(t:1000) = [];
+SumR(t:1000) = [];
+SumA(t:1000) = [];
+SumH(t:1000) = [];
+SumD(t:1000) = [];
 
 TotalDeaths = SumD(t-1)
 DaysLockdown = sum(lockdown)
 DaysCOVID = t
+FullLockdown
+RestrictedLockdown
+NoLockdown
 
 %plotted on a logarithmic y scale
 figure;
-plot(SumS/Asiz, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
-plot(SumE/Asiz, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
-plot(SumI/Asiz, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
-plot(SumA/Asiz, 'Color', '#ff7f00', 'LineWidth',1.5, 'DisplayName','Asymptomatic');
-plot(SumH/Asiz, 'Color', '#984ea3', 'LineWidth',1.5, 'DisplayName','Hospitalised'); %has slight problem
-plot(SumR/Asiz, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
-plot(SumD/Asiz, 'k','LineWidth',1.5,'DisplayName','Deceased');
+semilogy(SumS, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
+semilogy(SumE, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
+semilogy(SumI, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
+semilogy(SumA, 'Color', '#ff7f00', 'LineWidth',1.5, 'DisplayName','Asymptomatic');
+semilogy(SumH, 'Color', '#984ea3', 'LineWidth',1.5, 'DisplayName','Hospitalised');
+semilogy(SumR, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
+semilogy(SumD, 'k','LineWidth',1.5,'DisplayName','Deceased');
 
 figure(2);
-plot(lockdown, 'Displayname', 'Lockdown');hold on
+plot(lockdown, 'Displayname', 'Lockdown')
+ylim([0 1.1])
+xlim([0 t+5])
+
+figure(3);
 plot(mask, 'Displayname', 'Mask')
 ylim([0 1.1])
 xlim([0 t+5])
