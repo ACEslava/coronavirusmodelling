@@ -31,6 +31,8 @@ Changelog 0.2 (SEIRAHD):
 
 Tweaked parameters some more
 
+Added virus testing error
+
 Improved graph appearance
 
 Optimised code to run faster
