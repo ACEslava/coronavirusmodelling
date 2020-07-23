@@ -237,7 +237,7 @@ xlim([0 t-1]);
 grid on;
 
 figure(2);
-plot(SumS, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible');
+plot(SumS, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
 plot(SumE, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
 plot(SumI, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
 plot(SumA, 'Color', '#ff7f00', 'LineWidth',1.5, 'DisplayName','Asymptomatic');
@@ -245,7 +245,7 @@ plot(SumH, 'Color', '#984ea3', 'LineWidth',1.5, 'DisplayName','Hospitalised');
 plot(SumR, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
 plot(SumD, 'k','LineWidth',1.5,'DisplayName','Deceased');
 
-L = area(lockdown.*Asiz, 'LineStyle', ':','DisplayName', 'Lockdown'); hold on
+L = area(lockdown.*Asiz, 'LineStyle', ':','DisplayName', 'Lockdown');
 L.FaceColor = [0.1 0.1 0.5];
 L.FaceAlpha = 0.1;
 
