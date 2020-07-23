@@ -5,8 +5,8 @@ Google Slides: https://docs.google.com/presentation/d/1SKKAzS4NfbKL9ZyYZfk1joR-H
 Google Docs Notes: https://docs.google.com/document/d/14N1PLHnS2M2f0b7z_c2C7fkpO5GcgqwEbVnwKXVoaqw/edit?usp=sharing
 
 
-
-Changelog July 22 (SEIRAHD):
+___________________
+Changelog 0.1 (SEIRAHD):
 
 Tweaked parameters to fit real data
 
@@ -25,3 +25,14 @@ Optimised code to run faster
 Resolved negative infection bug
 
 Main population chart outputs logarithmic scaled y axis
+
+__________________
+Changelog 0.2 (SEIRAHD):
+
+Tweaked parameters some more
+
+Improved graph appearance
+
+Optimised code to run faster
+
+Bug squashing
