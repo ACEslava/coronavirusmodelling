@@ -6,14 +6,13 @@ clc
 alpha = 0.1; 
 beta = 0.1;
 gamma = 0.08; 
-delta = 0.7; 
+delta = 0.5; 
 theta = 0.4;
-h = 0.0603;
-omega = 0.1;
-Seeds = 1;
+Seeds = 6;
 TestingError = 0.7; %Percent of tests that are true positive/true negative.
 movement = 1; %Initial movement is 1*normal movement
 Asiz = 5000;
+GroceryStore = 0.01;
 
 %Creates the initial graph
 positionx = unifrnd(-1,1,Asiz,1);
@@ -73,10 +72,10 @@ while (sum(E) + sum(As) + sum(I) > 0)
     
     
     %Grocery Store!
-    for k=1:Asiz
-        if rand < 0.01
-        node1(k) = unifrnd(-0.0001,0.0001);
-        node2(k) = unifrnd(-0.0001,0.0001);
+    for i=1:Asiz
+        if rand < GroceryStore
+        node1(i) = unifrnd(-0.0001,0.0001);
+        node2(i) = unifrnd(-0.0001,0.0001);
         end
     end
     
@@ -117,11 +116,13 @@ while (sum(E) + sum(As) + sum(I) > 0)
         proximity = 0.06;
         movement = 0.4;
         lockdown(t) = 1;
+        GroceryStore = 0.005;
     elseif zerodays > 14 %None
         proximity = 0.1;
         movement = 1;
         lockdown(t) = 0;
         lockdowndays = 0;
+        GroceryStore = 0.008;
     elseif t == 1
         lockdown (1) = 0;
     else
@@ -133,6 +134,7 @@ while (sum(E) + sum(As) + sum(I) > 0)
         movement = 0.7;
         lockdown(t) = 0.5;
         lockdowndays = 0;
+        GroceryStore = 0.01;
     end
     
     %Updates Lockdown Counters
@@ -156,6 +158,16 @@ while (sum(E) + sum(As) + sum(I) > 0)
         mask(t) = mask(t-1);
     end
 
+    %Quarantine
+    for i=1:Asiz
+        if and(I(i) == 1, rand < TestingError)
+            for j=1:Asiz
+                A(i,j) = 0;
+                A(j,i) = 0;
+            end
+        end
+    end
+    
     %Mask wearing neighbors
     INeighbors = A*(or(I,As)); %vector of infected neighbors
     INeighbors_Mask = A*(or(I,As)).*Masks;
@@ -178,10 +190,10 @@ while (sum(E) + sum(As) + sum(I) > 0)
     %I to H
     IRandom = rand(Asiz,1);
     %NewH = and((IRandom<0.1), boolean(I));
-    age85 = and (boolean(I), and ((HRandom < 0.02), (IRandom < 0.03)));
-    age75 = and (boolean(I), and (and ((HRandom > 0.02), (HRandom < 0.06)), (IRandom < 0.02)));
-    age65 = and (boolean(I), and(and ((HRandom > 0.06), (HRandom < 0.16)), (IRandom < 0.01)));
-    ageother = and (boolean(I), and ((HRandom > 0.16), (IRandom < 0.001)));
+    age85 = and (boolean(I), and ((HRandom < 0.02), (IRandom < 0.5)));
+    age75 = and (boolean(I), and (and ((HRandom > 0.02), (HRandom < 0.06)), (IRandom < 0.43)));
+    age65 = and (boolean(I), and(and ((HRandom > 0.06), (HRandom < 0.16)), (IRandom < 0.3)));
+    ageother = and (boolean(I), and ((HRandom > 0.16), (IRandom < 0.10)));
     NewH = or (age85, age75);
     NewH = or (NewH, age65);
     NewH = or (NewH, ageother);
@@ -196,10 +208,10 @@ while (sum(E) + sum(As) + sum(I) > 0)
     
     %H to D
     anotherrand = rand(Asiz, 1);
-    age85 = and ((anotherrand < 0.1), and ((HRandom < 0.02), boolean(H)));
+    age85 = and ((anotherrand < 0.12), and ((HRandom < 0.02), boolean(H)));
     age75 = and ((anotherrand < 0.06), and (and ((HRandom > 0.02), (HRandom < 0.06)), boolean(H)));
-    age65 = and ((anotherrand < 0.04), and (and ((HRandom > 0.06), (HRandom < 0.16)), boolean(H)));
-    ageother = and ((anotherrand < 0.01), and ((HRandom > 0.16), boolean(H)));
+    age65 = and ((anotherrand < 0.028), and (and ((HRandom > 0.06), (HRandom < 0.16)), boolean(H)));
+    ageother = and ((anotherrand < 0.002), and ((HRandom > 0.16), boolean(H)));
     NewD = and (not(NewR), or (or (or (age85, age75), age65), ageother));
 
     %Update indicators
@@ -223,40 +235,44 @@ RestrictedLockdown
 NoLockdown
 
 %plotted on a logarithmic y scale
-figure;
-semilogy(SumS, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
-semilogy(SumE, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
-semilogy(SumI, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
-semilogy(SumA, 'Color', '#ff7f00', 'LineWidth',1.5, 'DisplayName','Asymptomatic');
-semilogy(SumH, 'Color', '#984ea3', 'LineWidth',1.5, 'DisplayName','Hospitalised');
-semilogy(SumR, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
-semilogy(SumD, 'k','LineWidth',1.5,'DisplayName','Deceased');
-L = area(lockdown.*Asiz, 'LineStyle', ':', 'DisplayName', 'Lockdown');
+figure; ('Logarithmic Plot of the Population Distributions for the SEIRAHD Model');
+semilogy(SumS/Asiz, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
+semilogy(SumE/Asiz, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
+semilogy(SumI/Asiz, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
+semilogy(SumA/Asiz, 'Color', '#ff7f00', 'LineWidth',1.5, 'DisplayName','Asymptomatic');
+semilogy(SumH/Asiz, 'Color', '#984ea3', 'LineWidth',1.5, 'DisplayName','Hospitalised');
+semilogy(SumR/Asiz, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
+semilogy(SumD/Asiz, 'k','LineWidth',1.5,'DisplayName','Deceased');
+L = area(lockdown, 'LineStyle', ':', 'DisplayName', 'Lockdown');
 L.FaceColor = [0.1 0.1 0.5];
 L.FaceAlpha = 0.1;
 
-M = area(mask.*Asiz, 'LineStyle', ':', 'DisplayName', 'Masks');
+M = area(mask, 'LineStyle', ':', 'DisplayName', 'Masks');
 M.FaceColor = [0.5 0.1 0.1];
 M.FaceAlpha = 0.1;
 xlim([0 t-1]);
+xlabel('Time (Days)');
+ylabel('Proportion of the Population');
 grid on;
 
-figure(2);
-plot(SumS, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
-plot(SumE, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
-plot(SumI, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
-plot(SumA, 'Color', '#ff7f00', 'LineWidth',1.5, 'DisplayName','Asymptomatic');
-plot(SumH, 'Color', '#984ea3', 'LineWidth',1.5, 'DisplayName','Hospitalised');
-plot(SumR, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
-plot(SumD, 'k','LineWidth',1.5,'DisplayName','Deceased');
+figure(2); title('Plot of the Population Distributions for the SEIRAHD Model')
+plot(SumS/Asiz, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
+plot(SumE/Asiz, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
+plot(SumI/Asiz, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
+plot(SumA/Asiz, 'Color', '#ff7f00', 'LineWidth',1.5, 'DisplayName','Asymptomatic');
+plot(SumH/Asiz, 'Color', '#984ea3', 'LineWidth',1.5, 'DisplayName','Hospitalised');
+plot(SumR/Asiz, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
+plot(SumD/Asiz, 'k','LineWidth',1.5,'DisplayName','Deceased');
 
-L = area(lockdown.*Asiz, 'LineStyle', ':','DisplayName', 'Lockdown');
+L = area(lockdown, 'LineStyle', ':','DisplayName', 'Lockdown');
 L.FaceColor = [0.1 0.1 0.5];
 L.FaceAlpha = 0.1;
 
-M = area(mask.*Asiz, 'LineStyle', ':', 'DisplayName', 'Masks');
+M = area(mask, 'LineStyle', ':', 'DisplayName', 'Masks');
 M.FaceColor = [0.5 0.1 0.1];
 M.FaceAlpha = 0.1;
 xlim([0 t-1]);
+xlabel('Time (Days)');
+ylabel('Proportion of the Population');
 grid on;
 
