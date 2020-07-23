@@ -3,12 +3,12 @@ close all
 clc
 
 %Parameters
-alpha = 0.09; 
+alpha = 0.1; 
 beta = 0.1;
 gamma = 0.08; 
 delta = 0.7; 
 theta = 0.4;
-h = 0.2033;
+h = 0.0603;
 omega = 0.1;
 Seeds = 1;
 TestingError = 0.7; %Percent of tests that are true positive/true negative.
@@ -18,8 +18,8 @@ Asiz = 5000;
 %Creates the initial graph
 positionx = unifrnd(-1,1,Asiz,1);
 positiony = unifrnd(-1,1,Asiz,1);
-node1=positionx;
-node2=positiony ;
+[node1, node1save] = deal(positionx);
+[node2, node2save] = deal(positiony);
 node1(node1>1) = -1;
 node1(node1<-1) = 1;
 node2(node2>1) = -1;
@@ -57,14 +57,28 @@ HRandom = rand(Asiz,1);
 while (sum(E) + sum(As) + sum(I) > 0) 
 
     %Randomly moves nodes based on movement multiplier (0.6x movement, 2x movement, etc)
-    node1=positionx+movement*(unifrnd(-0.1,0.1,Asiz,1));
-    node2=positiony+movement*(unifrnd(-0.1,0.1,Asiz,1));
+    [node1, node1save] = deal(positionx+movement*(unifrnd(-0.1,0.1,Asiz,1)));
+    [node2, node2save] = deal(positiony+movement*(unifrnd(-0.1,0.1,Asiz,1)));
     
     %Checks if nodes are out of bounds
     node1(node1>1) = -1;
     node1(node1<-1) = 1;
     node2(node2>1) = -1;
     node2(node2<-1) = 1;
+    
+    node1save(node1save>1) = -1;
+    node1save(node1save<-1) = 1;
+    node2save(node2save>1) = -1;
+    node2save(node2save<-1) = 1;
+    
+    
+    %Grocery Store!
+    for k=1:Asiz
+        if rand < 0.01
+        node1(k) = unifrnd(-0.0001,0.0001);
+        node2(k) = unifrnd(-0.0001,0.0001);
+        end
+    end
     
     %Regenerates the graph based on movements
     for j=1:Asiz
@@ -73,8 +87,8 @@ while (sum(E) + sum(As) + sum(I) > 0)
             A(i,j) = Distance(i,j) < proximity;
         end
     end
-    positionx = node1;
-    positiony = node2;
+    positionx = node1save;
+    positiony = node2save;
     
     %Mask wearers
     Masks = zeros(Asiz,1);
@@ -99,7 +113,7 @@ while (sum(E) + sum(As) + sum(I) > 0)
     end
     
     %Lockdown Strategy
-    if ((TestingError*SumI(t))/Asiz) > 0.005 %Full Lockdown
+    if ((TestingError*SumI(t))/Asiz) > 0.0025 %Full Lockdown
         proximity = 0.06;
         movement = 0.4;
         lockdown(t) = 1;
@@ -115,8 +129,8 @@ while (sum(E) + sum(As) + sum(I) > 0)
     end
     
     if lockdowndays > 60 %Restricted Lockdown
-        proximity = 0.07; 
-        movement = 0.55;
+        proximity = 0.08; 
+        movement = 0.7;
         lockdown(t) = 0.5;
         lockdowndays = 0;
     end
@@ -134,7 +148,7 @@ while (sum(E) + sum(As) + sum(I) > 0)
     %Mask Strategy
     if (SumI(t)/Asiz) > 0.00000094285
         mask(t) = 1;
-    elseif zerodays > 21
+    elseif zerodays > 18
         mask(t) = 0;
     elseif t==1
         mask(1) =0;
@@ -196,19 +210,10 @@ while (sum(E) + sum(As) + sum(I) > 0)
     H = H + NewH - (HtoR + NewD);
     R = R + NewR;
     D = D + NewD;
+    
+    node1 = node1save;
+    node2 = node2save;
     t=t+1
-end
-% SumS(t:1000) = [];
-% SumE(t:1000) = [];
-% SumI(t:1000) = [];
-% SumR(t:1000) = [];
-% SumA(t:1000) = [];
-% SumH(t:1000) = [];
-% SumD(t:1000) = [];
-
-if t < 200
-    lockdown(t:200) = [];
-    mask(t:200) = []
 end
 
 TotalDeaths = SumD(t-1)
