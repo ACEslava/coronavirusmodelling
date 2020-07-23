@@ -29,6 +29,8 @@ Main population chart outputs logarithmic scaled y axis
 __________________
 Changelog 0.2 (SEIRAHD):
 
+Simulated Central Meeting Area
+
 Tweaked parameters some more
 
 Added virus testing error
