@@ -1,11 +1,10 @@
 clear all
 close all
-
 SEIRAHD
 Horizon = t-1;
 TrainHorizon = floor(0.3*Horizon);
-TrueI=SumI([1:1:TrainHorizon]);
-TrueR=SumR([1:1:TrainHorizon]);
+TrueI=SumI([1:1:TrainHorizon],1).';
+TrueR=SumR([1:1:TrainHorizon],1).';
 
 %Initial Parameter guesses
 alpha = 0.3; %Given
@@ -15,10 +14,10 @@ delta = 0.4; %Given
 theta = 0.3; %Given
 h = 0.015; %(delta/0.9) = (h/0.1)
 omega = 0.05; %(theta/0.9) = (omega/0.1)
-Seeds = 10;
+Seeds = 1;
 
 gradsteps = 1;
-stepsize = 1e-8;
+stepsize = 1e-7;
 Stop = 0;
 Increment = 0.01;
 
@@ -74,7 +73,7 @@ h
 omega
 
 [ModelS,ModelE,ModelI,ModelR,ModelA,ModelH,ModelD] = SEIRAHDsimpleFunc(alpha,beta,gamma,delta,theta,h,omega,Asiz,Seeds,Horizon);
-figure(2);
+figure(5);
 plot(ModelS, 'Color', '#377eb8', 'LineWidth',1.5, 'DisplayName','Susceptible'); hold on
 plot(ModelE, 'Color', '#62466B', 'LineWidth',1.5, 'DisplayName','Exposed');
 plot(ModelI, 'Color', '#e41a1c', 'LineWidth',1.5, 'DisplayName','Infected');
@@ -84,10 +83,10 @@ plot(ModelR, 'Color', '#4daf4a', 'LineWidth',1.5, 'DisplayName','Recovered');
 plot(ModelD, 'k','LineWidth',1.5,'DisplayName','Deceased');
 
 
-figure(3)
+figure(6)
 plot(ModelError)
 
-figure(4)
+figure(7)
 plot(ModelR); hold on;
 plot(SumR);
 
