@@ -41,8 +41,10 @@ end
 
 S = ones(Asiz,1) - E; %assigns susceptible population
 [I,As,R,H,D] = deal(zeros(Asiz,1)); %all other populations are 0 (no vaccines)
+EC = 0;
+NewEC = 0;
 [NewS,NewE,NewI,NewA,NewR,NewH,NewD] = deal(zeros(Asiz,1));
-[SumS,SumE,SumI,SumA,SumR,SumH,SumD] = deal(zeros(1000,1));
+[SumS,SumE,SumI,SumA,SumR,SumH,SumD, EconomicCost] = deal(zeros(1000,1));
 
 
 t = 1;
@@ -53,6 +55,11 @@ ACurrent = A;
 HRandom = rand(Asiz,1);
 
 %Iterations of infection
+
+%________________________________________________________________________________________________
+
+
+
 while (sum(E) + sum(As) + sum(I) > 0) 
 
     %Randomly moves nodes based on movement multiplier (0.6x movement, 2x movement, etc)
@@ -91,7 +98,7 @@ while (sum(E) + sum(As) + sum(I) > 0)
     
     %Mask wearers
     Masks = zeros(Asiz,1);
-    for maskcount=1:floor(Asiz*0.5)
+    for maskcount=1:floor(Asiz*0.5) 
         Masks(ceil(Asiz*rand)) = 1; %assigns random people to be mask wearers according to percentage defined in for loop
     end
 
@@ -103,6 +110,12 @@ while (sum(E) + sum(As) + sum(I) > 0)
     SumH(t) = sum(H);
     SumR(t) = sum(R);
     SumD(t) = sum(D);
+    if t > 1
+        EconomicCost(t) = EC + EconomicCost(t-1);
+    else
+        EconomicCost(t) = EC;
+    end
+
 
     %Counts days where no infected individuals exist
     if SumI(t) == 0
@@ -127,6 +140,10 @@ while (sum(E) + sum(As) + sum(I) > 0)
         lockdown (1) = 0;
     else
         lockdown(t) = lockdown(t-1);
+    end
+    
+    if lockdown(t) == 1
+        NewEC = NewEC + 6100411;
     end
     
     if lockdowndays > 60 %Restricted Lockdown
@@ -209,9 +226,13 @@ while (sum(E) + sum(As) + sum(I) > 0)
     %H to D
     anotherrand = rand(Asiz, 1);
     age85 = and ((anotherrand < 0.12), and ((HRandom < 0.02), boolean(H)));
+    NewEC = NewEC + sum(age85) * 4583775;
     age75 = and ((anotherrand < 0.06), and (and ((HRandom > 0.02), (HRandom < 0.06)), boolean(H)));
+    NewEC = NewEC + sum(age75) * 9188775;
     age65 = and ((anotherrand < 0.028), and (and ((HRandom > 0.06), (HRandom < 0.16)), boolean(H)));
+    NewEC = NewEC + sum(age65) * 5428140;
     ageother = and ((anotherrand < 0.002), and ((HRandom > 0.16), boolean(H)));
+    NewEC = NewEC + sum(ageother) * 9556140;
     NewD = and (not(NewR), or (or (or (age85, age75), age65), ageother));
 
     %Update indicators
@@ -222,6 +243,8 @@ while (sum(E) + sum(As) + sum(I) > 0)
     H = H + NewH - (HtoR + NewD);
     R = R + NewR;
     D = D + NewD;
+    EC = NewEC - sum(NewD)*10000000;
+    
     
     node1 = node1save;
     node2 = node2save;
@@ -276,3 +299,7 @@ xlabel('Time (Days)');
 ylabel('Proportion of the Population');
 grid on;
 
+
+figure(3); title ('Plot of Economic Impact')
+plot (EconomicCost);
+xlim([0 t-1]);
